@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+
+    <title>Introduce Observable</title>
+
+    <meta name="description" content="observable slide">
+    <meta name="author" content="pastelInc">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/sawayaka.css" id="theme">
+
+    <!-- Code syntax highlighting -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
+        document.getElementsByTagName('head')[0].appendChild(link);
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+
+<div class="reveal">
+
+    <!-- Any section element inside of this container is displayed as a slide -->
+    <div class="slides">
+        <section class="deck-slide">
+            <hgroup>
+                <h1 style="font-size: 2em;">Observable触らんかね？</h1>
+            </hgroup>
+            <div class="profile">
+                <img src="img/pastel.png">
+                <p>@pastelInc</p>
+            </div>
+        </section>
+
+        <section class="deck-slide">
+            <h2>Observable ⊆ Angular2</h2>
+        </section>
+
+        <section class="deck-slide">
+            <h2>Contents</h2>
+            <ul>
+                <li>即結果を反映するフォームの実装</li>
+                <li>Observableの提案</li>
+            </ul>
+        </section>
+
+        <section class="deck-slide">
+            <h2>即結果を反映するフォームの実装</h2>
+        </section>
+
+        <section class="deck-slide">
+            <h2 style="font-size: 1.2em">タイピング中にページを検索する機能</h2>
+            <img src="img/screen-google.png" alt="screen-google" width="72%" height="72%">
+        </section>
+
+        <section class="deck-slide">
+            <h2>どうやって実装しよう</h2>
+            <!--<p>searchとlistenに分けてやれば良さそうです。</p>-->
+        </section>
+
+        <section class="deck-slide">
+            <pre><code>function search(event) {
+  const xhr = new XMLHttpRequest();
+  const query = event.target.value;
+  const url = location.href;
+
+  xhr.onreadystatechange = function(){
+    if (this.readyState === 4 && this.status === 200) {
+      render(this.responseText);
+    }
+  };
+  xhr.open('GET', url, true);
+  xhr.send();
+};
+</code></pre>
+        </section>
+
+        <section class="deck-slide">
+            <pre><code>function listen(element, eventName) {
+  element.addEventListener(eventName, search, true);
+}
+
+const inputElement = document.querySelector('input');
+
+listen(inputElement, 'keyup');</code></pre>
+        </section>
+
+        <section class="deck-slide">
+            <h2 style="font-size: 1.2em">リクエストの数を減らそう</h2>
+        </section>
+
+        <section class="deck-slide">
+            <h2>Timer導入！</h2>
+        </section>
+
+        <section class="deck-slide">
+            <h2>Timerを使ったメンタルモデル</h2>
+            <div>
+                <p class="fragment">ユーザーのキータイピング</p>
+                <p class="fragment">キータイピング停止</p>
+                <p class="fragment">タイマーが止まっていたらタイマースタート</p>
+                <p class="fragment">タイマーが0になったらリクエスト</p>
+                <p class="fragment">タイマーが動いていたらタイマーストップ/リセット</p>
+            </div>
+        </section>
+
+        <section class="deck-slide">
+            <pre><code style="font-size: 0.9em">class Timer {
+  private id;
+  
+  constructor() {
+    this.id = null;
+  }
+  
+  get isStarted() {
+    return this.id !== null;
+  }
+  
+  start(cb, msec) {
+    this.id = setTimeout(cb, msec);
+  }
+  
+  stop() {
+    clearInterval(this.id);
+  }
+  
+  reset() {
+    this.id = null;
+  }
+}</code></pre>
+        </section>
+        
+        <section class="deck-slide">
+            <pre><code style="font-size: 0.9em">function search(event) {
+  const xhr = new XMLHttpRequest();
+  const query = event.target.value;
+  const url = location.href;
+
+  xhr.onreadystatechange = function(){
+    if (this.readyState === 4 && this.status === 200) {
+      render(this.responseText);
+    }
+  };
+  xhr.open('GET', url, true);
+  if (!timer.isStarted) {
+    timer.start(xhr.send, 500);
+  } else {
+    timer.stop();
+    timer.reset();
+  }
+}</code></pre>
+        </section>
+
+        <section class="deck-slide">
+            <h2 style="font-size: 1.2em">同じクエリパラメータを無視しよう</h2>
+        </section>
+
+        <section class="deck-slide">
+            <h2>Cache導入！</h2>
+        </section>
+
+        <section class="deck-slide">
+            <h2>Cacheを使ったメンタルモデル</h2>
+            <div>
+                <p class="fragment">ユーザーのキータイピング</p>
+                <p class="fragment">キータイピング停止</p>
+                <p class="fragment">タイマーが止まっていたらタイマースタート</p>
+                <p class="fragment">タイマーが0になったらCache評価開始</p>
+                <p class="fragment">Cacheと同じクエリパラメータならリクエストしない</p>
+                <p class="fragment">Cacheと異なるクエリパラメータならリクエスト</p>
+                <p class="fragment">タイマーが動いていたらタイマーストップ/リセット</p>
+            </div>
+        </section>
+
+        <section class="deck-slide">
+            <pre><code style="font-size: 0.9em">class CacheQuery {
+  private query;
+  
+  constructor() {
+    this.query = '';
+  }
+  
+  get myQuery() {
+    return this.query;
+  }
+  
+  save(query) {
+    this.query = query;
+  }
+}</code></pre>
+        </section>
+
+        <section class="deck-slide">
+            <pre><code style="font-size: 0.9em">function search(event) {
+  const xhr = new XMLHttpRequest();
+  const query = event.target.value;
+  const url = location.href;
+
+  xhr.onreadystatechange = function(){
+    if (xhr.readyState === 4 && xhr.status === 200) {
+      render(xhr.responseText);
+    }
+  };
+  xhr.open('GET', url, true);
+  if (!timer.isStarted) {
+    timer.start(() => {
+      if (cache.myQuery !== query) {
+        xhr.send();
+        cache.save(query);
+      }
+    });
+  } else {
+    timer.stop();
+    timer.reset();
+  }
+}</code></pre>
+        </section>
+
+        <section class="deck-slide">
+            <h2 style="font-size: 0.9em">後からリクエストした結果が必ず表示されるようにしよう</h2>
+        </section>
+
+        <section class="deck-slide">
+            <h2>大変！難しい！</h2>
+        </section>
+
+        <section class="deck-slide">
+            <h2>状態の共有があればいけそう</h2>
+            <p>リクエストとレスポンスをペアとするような状態を何処かで実現しなければいけない。</p>
+            <pre><code>{
+  "id": 1 // リクエストのBodyにリクエストIDを設定する。
+}</code></pre>
+        </section>
+
+        <section class="deck-slide">
+            <h2 style="font-size: 1.2em">今までのメンタルモデルを振り返る</h2>
+            <p>現実世界の時間変化 = 計算機内での時間変化として考えていました。</p>
+        </section>
+
+        <section class="deck-slide">
+            <h2>これでわかった問題</h2>
+        </section>
+
+        <section class="deck-slide">
+            <h2 style="font-size: 1.2em">複数プロセス(オブジェクト)の同期が必要</h2>
+            <p>先程の例ではサーバと状態の同期(共有)が必要になりました。<br>他にもオブジェクトが互いに状態のやり取りを行う必要がありました。</p>
+        </section>
+
+        <section class="deck-slide">
+            <h2>事象の順序の制約</h2>
+            <p>私達が直感的に感じている順番で事象が起こるとは限らない。</p>
+        </section>
+
+        <!--<section class="deck-slide">
+            <h2>局所状態変数への代入で行うことがきっかけ</h2>
+        </section>
+
+        <section class="deck-slide">
+            <h2>なぜそうするようになったのか</h2>
+        </section>
+
+        <section class="deck-slide">
+            <h2>プログラムを分けて構造化する考え方</h2>
+        </section>
+
+        <section class="deck-slide">
+            <h2>データ構造としてのオブジェクト</h2>
+            <p>現実の時間的振る舞いをオブジェクトの時間的振る舞いでモデル化しました。</p>                
+        </section>
+
+        <section class="deck-slide">
+            <h2>とても直感的！わかりやすい！</h2>
+        </section>-->
+
+        <section class="deck-slide">
+            <h2>いい方法はないでしょうか</h2>
+        </section>
+
+        <!--<section class="deck-slide">
+            <h2>システムの利用者が時の概念を持ち込んでいる</h2>
+        </section>-->
+
+        <section class="deck-slide">
+            <h2>Observableを使いましょう！！！</h2>
+        </section>
+
+        <section class="deck-slide">
+            <h2>Observableの提案</h2>
+        </section>
+
+        <section class="deck-slide">
+            <h2 style="font-size: 1.2em">状態を保持した可変オブジェクトが不要</h2>
+            <p>Observableを実装すると先程の例のクラスが必要なくなります。</p>
+        </section>
+
+        <section class="deck-slide">
+            <h2>listen</h2>
+            <pre><code>function listen(element, eventName) {
+    return Rx.Observable.create(observer => {
+        let handler = event => observer.next(event);
+
+        element.addEventListener(eventName, handler, true);
+
+        return _ => {
+            element.removeEventListener(eventName, handler, true);
+        };
+    });
+}</code></pre>
+        </section>
+
+        <section class="deck-slide">
+            <h2>search</h2>
+            <pre><code style="font-size: 0.9em">function search(event) {
+  const xhr = new XMLHttpRequest();
+  const query = event.target.value;
+  const url = location.href;
+  const observable = Rx.Observable.create(observer => {
+    xhr.onreadystatechange = function(){
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        observer.next(xhr);
+      }
+    };
+  });
+
+  xhr.open('GET', url, true);
+  xhr.send();
+  return observable;
+}</code></pre>
+        </section>
+        
+        <section class="deck-slide">
+            <h2>Observable生成</h2>
+            <pre><code>const inputElement = document.querySelector('input');
+const observable = listen(inputElement, 'keyup')
+  .debounceTime(500) // 500msの間、keyupがなければデータソースを発信
+  .distinctUntilChanged() // 重複したデータソースをフィルタ
+  .switchMap((event) => search(event)) // レスポンスの前後が逆になった場合、後だけを発信するようにフィルタ
+;
+
+observable.subscribe({
+  next: xhr => {
+    render(xhr.responseText);
+  }
+});</code></pre>
+        </section>
+
+        <section class="deck-slide">
+            <h2>これがObservableの力！</h2>
+        </section>
+
+        <!--局所状態のような変わりゆく量を(順次の状態の時間的歴史を)表現するストリームを使ってモデル化する-->
+        <section class="deck-slide">
+            <h2>Observableの概念</h2>
+            <p>DOMイベント、timer intervals、socketのようなプッシュ型データソースをモデル化するために使います。</p>
+            <!--<p>Streamと言われるデータ構造の考え方のもとに成り立っています。<br>状態を持つ(現実の)オブジェクトをモデル化するもう一つの考え方</p>-->
+        </section>
+
+        <section class="deck-slide">
+            <h2>subscribe</h2>
+            <p>Observableでモデル化したプッシュ型のデータソースの評価を実行します。<br>この評価を後処理可能なオブジェクトを返します。</p>
+        </section>
+
+        <section class="deck-slide">
+            <h2>subscribeするまで変化は起きない</h2>
+            <div><a href="http://jsbin.com/soboyo/edit?js,output" target="_brank">http://jsbin.com/soboyo/edit?js,output</a></div>
+        </section>
+
+        <section class="deck-slide">
+            <h2>map/filter</h2>
+            <p>Observableにはmap/filterといった馴染みのメソッドが実装されるかもしれません。</p>
+            <p>map/filterはEcma262の提案に入ってないから注意！</p>
+        </section>
+        
+        <!--<section class="deck-slide">
+            <h2 style="font-size: 1.2em">まるで存在するリストを扱うかのよう</h2>
+            <pre><core style="font-size: 1.5em">function commandKeys(element) {
+    let keyCommands = { "38": "up", "40": "down" };
+
+    return listen(element, "keydown")
+        .filter(event => event.keyCode in keyCommands)
+        .map(event => keyCommands[event.keyCode])
+}</core></pre>
+        </section>-->
+        
+        <section class="deck-slide">
+            <h2 style="font-size: 1.2em">keyupイベントをリストのように扱う</h2>
+            <a href="https://jsbin.com/bipozi/2/edit?js,console,output" target="_brank">https://jsbin.com/bipozi/2/edit?js,console,output</a>
+        </section>
+
+        <!--<section class="deck-slide">
+            <h2>Observable遅延リスト</h2>
+            <p>時をObservableで表現することができます。<br>評価している関数の並びから時を切り離してくれます。</p>
+        </section>-->
+
+        <section class="deck-slide">
+            <h2>Observableで簡単！</h2>
+            <p>Observableによって、プッシュ型データソースを使った手続きを簡単に書くことができます。</p>
+        </section>
+
+        <section class="deck-slide">
+            <h2>Implementations</h2>
+            <p>Observableはまだ提案中なので使いたい時には以下のライブラリを利用できます。</p>
+            <ul>
+                <li>RxJS 5 (beta)</li>
+                <li>zen-observable</li>
+            </ul>
+        </section>
+
+        <section class="deck-slide">
+            <h2>Observable ⊆ RxJS</h2>
+            <p>RxJSはObservableを提供してくれます。RxJSを使うとmap/filter以外にもいろんなOperatorを使うことができます。</p>
+        </section>
+
+        <section class="deck-slide">
+            <h2 style="font-size: 1.2em">Angular2で結果を即反映するフォームの実装</h2>
+            <pre><code>export class App {
+  items: Observable&lt;Array&lt;string>>;
+  term = new Control();
+  constructor(private wikipediaService: WikipediaService) {
+    // subscribeしていないことがポイント
+    this.items = this.term.valueChanges
+                 .debounceTime(500)
+                 .distinctUntilChanged()
+                 .switchMap(term => this.wikipediaService.search(term));
+  }
+}</code></pre>
+        </section>
+        
+        <section class="deck-slide">
+            <h2 style="font-size: 1.2em">AsyncPipeでObservableを扱える</h2>
+            <pre><core style="font-size: 1.5em">@Component({
+  selector: 'my-app',
+  template: `
+    &lt;div>
+      &lt;h2>Wikipedia Search&lt;/h2>
+      &lt;input type="text" [ngFormControl]="term"/>
+      &lt;ul>
+        &lt;li *ngFor="#item of items | async">{{item}}&lt;/li>
+      &lt;/ul>
+    &lt;/div>
+  `
+})</core></pre>
+        </section>
+
+        <section class="deck-slide">
+            <h2>さぁ、Observableを触らんかね？</h2>
+        </section>
+
+        <section class="deck-slide">
+            <h2>学習リソース</h2>
+            <ul>
+                <li style="font-size: 0.9em">Structure and interpretation of computer programs - 2nd Edition</li>
+                <li><a href="http://www.bleathem.ca/blog/2015/06/rxjs-devnation.html">Rx.js Session at DevNation</a></li>
+                <li><a href="https://github.com/zenparsing/es-observable">zenparsing/es-observable</a></li>
+                <li><a href="https://github.com/ReactiveX/rxjs">ReactiveX/rxjs</a></li>
+                <li><a href="https://github.com/Reactive-Extensions/RxJS">Reactive-Extensions/RxJS</a></li>
+                <li><a href="https://github.com/zenparsing/zen-observable/">zenparsing/zen-observable</a></li>
+                <li><a href="http://blog.thoughtram.io/angular/2016/01/06/taking-advantage-of-observables-in-angular2.html">Taking advantage of Observables in Angular 2</a></li>
+            </ul>
+        </section>
+
+        <section class="deck-slide">
+            <hgroup>
+                <h1 style="font-size: 2em;">ありがとうございました!</h1>
+            </hgroup>
+            <div class="profile">
+                <img src="img/pastel.png">
+                <p>@pastelInc</p>
+            </div>
+        </section>
+    </div>
+
+</div>
+
+<script src="lib/js/head.min.js"></script>
+<script src="js/reveal.js"></script>
+
+<script>
+
+    // Full list of configuration options available at:
+    // https://github.com/hakimel/reveal.js#configuration
+    Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+
+        transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+        // Optional reveal.js plugins
+        dependencies: [
+            {
+                src: 'lib/js/classList.js', condition: function () {
+                return !document.body.classList;
+            }
+            },
+            {
+                src: 'plugin/markdown/marked.js', condition: function () {
+                return !!document.querySelector('[data-markdown]');
+            }
+            },
+            {
+                src: 'plugin/markdown/markdown.js', condition: function () {
+                return !!document.querySelector('[data-markdown]');
+            }
+            },
+            {
+                src: 'plugin/highlight/highlight.js', async: true, callback: function () {
+                hljs.initHighlightingOnLoad();
+            }
+            },
+            {src: 'plugin/zoom-js/zoom.js', async: true},
+            {src: 'plugin/notes/notes.js', async: true}
+        ]
+    });
+
+</script>
+
+</body>
+</html>

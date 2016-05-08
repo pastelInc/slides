@@ -1,5 +1,6 @@
 .DS_Store
 .svn
+.git
 log/*.log
 tmp/**
 node_modules/
