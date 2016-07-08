@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+
+    <title>Introduce Falcor</title>
+
+    <meta name="description" content="example slide">
+    <meta name="author" content="pastelInc">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/sawayaka.css" id="theme">
+
+    <!-- Code syntax highlighting -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
+        document.getElementsByTagName('head')[0].appendChild(link);
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+
+<div class="reveal">
+
+    <!-- Any section element inside of this container is displayed as a slide -->
+    <div class="slides">
+        <section class="deck-slide">
+            <hgroup>
+                <h1 style="font-size: 3em;">Falcorを紹介します</h1>
+            </hgroup>
+            <div class="profile">
+                <img src="img/pastel.png">
+                <p>@pastelInc</p>
+            </div>
+        </section>
+
+        <!--<section class="deck-slide">
+            <h2>About me</h2>
+            <div>
+                <img src="img/pastel.png" width="256" height="256" alt="pastel">
+                <ul style="vertical-align: top">
+                    <li>I &#128150; Anime, Manga, Game</li>
+                    <li>JavaScript/PHP</li>
+                </ul>
+            </div>
+        </section>-->
+
+        <!-- 今日のテーマ説明 -->
+        <!-- - GitHubページを開いてバージョン説明 -->
+        <!-- - GraphQLとぜひ比べてみて欲しい -->
+        <section class="deck-slide">
+            <div style="text-align: center">
+                <img src="img/falcor-icon.png" alt="falcor-icon">
+            </div>
+        </section>
+
+        <!-- Falcorはミドルウェア -->
+        <!-- - クライアントとサーバサイド両方に寄り添っている -->
+        <!-- - どんなデータを通信するのかどんなデータをキャッシュするのか選別 -->
+        <section class="deck-slide">
+            <h2>ミドルウェア</h2>
+            <div>
+                <img width="200%" height="200%" src="img/falcor-position.png" alt="falcor-position">
+            </div>
+        </section>
+
+        <!-- Falcorの特徴 -->
+        <!-- - 効率的=>キャッシングの話 -->
+        <!-- - 透過的にリモートのデータソースを扱う -->
+        <!-- - JSONオブジェクトのことをJSON Graphという -->
+        <!-- - Falcorの目的について言及されていない -->
+        <section class="deck-slide">
+            <h2>Falcor概要</h2>
+            <ul style="vertical-align: top">
+                <li>Netflixが開発したOSS</li>
+                <li>効率的にデータを取り出すJavaScriptライブラリ</li>
+                <li>リモートデータソースを仮想的なJSONオブジェクトとしてモデル化する</li>
+            </ul>
+        </section>
+
+        <!-- タブレット、スマートフォン、 AppleTV のようなセットトップボックス、さらには PlayStation3 のような据え置きゲーム機など、さまざまなクライアントからアクセスされる  -->
+        <!-- Netflixとは -->
+        <!-- - Netflixを検索 -->
+        <!-- - 様々なデバイス間のアプリケーション間の通信 -->
+        <!-- - 特異な状況 -->
+        <!-- - 単一の API で全てをカバー -->
+        <section class="deck-slide">
+            <div>
+                <img src="img/netflix-network-diagram.jpg" width="200%" height="200%" alt="network-diagram">
+            </div>
+        </section>
+
+        <!-- Netflix の API は、各クライアントごとに特化したインタフェースを提供するアダプタ層と、その裏側にあるジェネリックな API との二層構造になっている。 -->
+        <!-- とった対策その1 -->
+        <!-- - 各クライアントごとに特化したインタフェースを提供するアダプタ層 -->
+        <!-- - 裏側にあるジェネリックな API との二層構造 -->
+        <section class="deck-slide">
+            <div>
+                <img src="img/netflix-network-diagram2.jpg" width="200%" height="200%" alt="network-diagram2">
+            </div>
+        </section>
+
+        <!-- 第一の目標は、当社のキャッシュコードの効率を向上させる、または他の言葉で、私たちの前のキャッシュ層に伴う複雑さとメンテナンスのコストを減少させることでした。 二次の目標は、性能（スピード＆メモリ使用量）を維持または向上させながら、これらの変更を行うことでした。  -->
+        <!-- これを行うの主な課題は、アプリの品質への影響を最小限に抑えて、新しいFalcorコンポーネントのための当社の既存のデータ・キャッシング層をスワップアウトすることでした。  -->
+        <!-- Netflixのtechブログより目標 -->
+        <!-- - 複数クライアントが共有リソースを持つ場合に同じアイテムがメモリに複数の場所で表されてた -->
+        <!-- - そのキャッシュ層が複雑だった -->
+        <!-- - やるにあたり性能を維持または向上させたかった -->
+        <section class="deck-slide">
+            <h2>Falcorの目標</h2>
+            <ul style="vertical-align: top">
+                <li>キャッシュコードの効率を向上させる</li>
+                <li>キャッシュとメモリ間の一貫性を保つ(<a href="https://ja.wikipedia.org/wiki/%E3%82%AD%E3%83%A3%E3%83%83%E3%82%B7%E3%83%A5%E3%82%B3%E3%83%92%E3%83%BC%E3%83%AC%E3%83%B3%E3%82%B7" target="_brank">キャッシュコヒーレンシ</a>)</li>
+                <li>複雑さとメンテナンスコストの減少</li>
+                <li>性能(スピード＆メモリ使用量)を維持</li>
+            </ul>
+        </section>
+
+        <!-- Netflixが目標を実現するために考えたFalcorの技術的構造 -->
+        <section class="deck-slide">
+            <h2>Falcorの技術的構造</h2>
+        </section>
+
+        <!-- Falcorは多数のバックエンドをまとめ上げた -->
+        <!-- - 仮想的にアプリケーションサーバから単一のJSONモデルのみをやり取りできるようにした -->
+        <!-- - クライアントから見た時に一つのJSONを触っているように見える -->
+        <section class="deck-slide">
+            <h2>単一のJSONモデルに集約</h2>
+            <div style="text-align: center">
+                <img src="img/one-model-everywhere.png" width="72%" height="72%" alt="one-model-everywhere">
+            </div>
+        </section>
+
+        <!-- 仮想的なJSONオブジェクト = JSON Graph -->
+        <!-- - この記述を守ることでJSONでGraphっぽいことが実現できる -->
+        <section class="deck-slide">
+            <h2>JSON Graph</h2>
+            <pre><code style="font-size: 1em">{
+    todosById: {
+        "1": {
+            name: "get milk from corner store",
+            done: false,
+            prerequisites: [{ $type: "ref", value: ["todosById", 2] }]
+        },
+        "2": {
+            name: "withdraw money from ATM",
+            done: false,
+            prerequisites: []
+        }
+    },
+    todos: [
+        { $type: "ref", value: ["todosById", 1] },
+        { $type: "ref", value: ["todosById", 2] },
+        { $type: "ref", value: ["todosById", 2] }
+    ]
+};</code></pre>
+        </section>
+
+        <!-- 通常のJSONに似たアクセスパスがある -->
+        <!-- - 先ほどのグラフを想像してこの値が返ってくるのがわかる -->
+        <section class="deck-slide">
+            <h2>パス</h2>
+            <pre><code>"todos[0].name"
+"todos[0..2]['name','done']"</code></pre>
+            <pre><code>model.getValue('todos[0].name').then(log);
+
+"get milk from corner store"</code></pre>
+        </section>
+
+        <!-- サーバー上のDBでは単一のエンティティであった投稿が、クライアント上では別のオブジェクトとして扱われてしまったため -->
+        <!-- JSON Graphである必要性 -->
+        <!-- - サーバー上のDBでは更新されても単一のエンティティ -->
+        <!-- - クライアント上ではそのエンティティを持つオブジェクトはそれぞれ別のオブジェクトとして扱われる -->
+        <section class="deck-slide">
+            <h2>サーバでは単一エンティティ</h2>
+            <div style="text-align: center">
+                <img src="img/why-json-graph.png" width="100%" height="100%" alt="why-json-graph">
+            </div>
+        </section>
+
+        <!-- 本当は同一のエンティティ -->
+        <!-- - もし片方が更新されて、他のユーザーにきちんと伝播できないとめんどう -->
+        <!-- - IDはエンティティ内では一意だがクライアントのグローバルでは意味ない -->
+        <section class="deck-slide">
+            <h2>Objectには一意な識別子がない</h2>
+            <div style="text-align: center">
+                <img src="img/why-json-graph2.png" width="72%" height="72%" alt="why-json-graph">
+            </div>
+        </section>
+
+        <!-- Falcorのクライアントサイドのマージ -->
+        <!-- - 同じエンティティの実体は重複することなく一つだけ -->
+        <section class="deck-slide">
+            <h2>重複を導入することなく、JSONとしてモデル化</h2>
+            <div style="text-align: center">
+                <img src="img/why-json-graph3.png" width="100%" height="100%" alt="why-json-graph">
+            </div>
+        </section>
+
+        <!-- Falcorはクライアントのキャッシュにパスがあればそれを返す -->
+        <section class="deck-slide">
+            <h2>Falcorを利用すると</h2>
+            <ul style="vertical-align: top">
+                <li>通信を透過的にする</li>
+                <li>ローカルのキャッシュにパスが無いときに問い合わせる</li>
+            </ul>
+        </section>
+
+        <section class="deck-slide">
+            <h2>通信回数を少なく、データ量を少なくより効率的に</h2>
+        </section>
+
+        <section class="deck-slide">
+            <h2>複数バックエンドサービスのためにRouterを提供</h2>
+            <div>
+                <img src="img/falcor-router.png" width="100%" height="100%" alt="falcor-router">
+            </div>
+        </section>
+
+        <section class="deck-slide">
+            <h2>ただしサーバサイドは自分で実装する必要がある</h2>
+            <ul style="vertical-align: top">
+                <li>クライアントにどんなJSON Graphを返すのか考えなければいけない</li>
+                <li>リクエストを受け取ってから他のAPIを叩いてももちろん大丈夫</li>
+                <li>Nodeでの実装がメイン</li>
+            </ul>
+        </section>
+
+        <section class="deck-slide">
+            <h2>Falcor</h2>
+            <ul style="vertical-align: top">
+                <li>JSON Graphとパスを使うことで透過的な通信</li>
+                <li>JSON Graphとパスを使うことで効率的な通信</li>
+                <li>使い方を覚えるのは簡単</li>
+            </ul>
+        </section>
+
+        <section class="deck-slide">
+            <h2>ぜひ一度触ってみてください！</h2>
+        </section>
+
+        <section class="deck-slide">
+            <h1 style="margin-top: 2em;">Thanks!</h1>
+            <div class="profile">
+                <img src="img/pastel.png">
+                <p>@pastelInc</p>
+            </div>
+        </section>
+    </div>
+
+</div>
+
+<script src="lib/js/head.min.js"></script>
+<script src="js/reveal.js"></script>
+
+<script>
+
+    // Full list of configuration options available at:
+    // https://github.com/hakimel/reveal.js#configuration
+    Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+
+        transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+        // Optional reveal.js plugins
+        dependencies: [
+            {
+                src: 'lib/js/classList.js', condition: function () {
+                return !document.body.classList;
+            }
+            },
+            {
+                src: 'plugin/markdown/marked.js', condition: function () {
+                return !!document.querySelector('[data-markdown]');
+            }
+            },
+            {
+                src: 'plugin/markdown/markdown.js', condition: function () {
+                return !!document.querySelector('[data-markdown]');
+            }
+            },
+            {
+                src: 'plugin/highlight/highlight.js', async: true, callback: function () {
+                hljs.initHighlightingOnLoad();
+            }
+            },
+            {src: 'plugin/zoom-js/zoom.js', async: true},
+            {src: 'plugin/notes/notes.js', async: true}
+        ]
+    });
+
+</script>
+
+</body>
+</html>
