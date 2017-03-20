@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>reveal-md</title>
+        <link rel="stylesheet" href="/css/reveal.css">
+        <link rel="stylesheet" href="/css/theme/sawayaka.css" id="theme">
+        <link rel="stylesheet" href="/css/highlight/zenburn.css">
+        <link rel="stylesheet" href="/css/print/paper.css" type="text/css" media="print">
+
+    </head>
+    <body>
+
+        <div class="reveal">
+            <div class="slides"><section  data-markdown><script type="text/template"><!-- .element: id="what-s-new-in-angular-4" style="font-size: 0.9em;" -->
+# What's new in Angular 4
+
+@pastelInc
+</script></section><section  data-markdown><script type="text/template">
+<!-- .slide: data-background="./img/angular4announcement.png" -->
+
+<aside class="notes"><ul>
+<li>自己紹介</li>
+<li>Angular 4の魅力をお届け</li>
+</ul>
+</aside></script></section><section  data-markdown><script type="text/template">
+<!-- .slide: data-background="./img/breaking-changes.png" -->
+
+<aside class="notes"><ul>
+<li>AngularJSからAngular 2のリリースまでの道のり</li>
+<li>予告のない破壊的変更が多く開発者を悩ませました</li>
+<li>リリースノートを見て問題に気がつくことも少なくありませんでした</li>
+<li>問題発見までの道のりもかなり大変だった</li>
+<li>Angular 2からAngular 4のリリースでは開発者に安定性をお届けします</li>
+</ul>
+</aside></script></section><section ><section data-markdown><script type="text/template">
+## Semantic Versioning
+
+http://semver.org/
+
+<aside class="notes"><ul>
+<li>安定したリリースのためにSemVerを採用</li>
+<li>Angular 2.0のリリース時 (09/2016) からすでに実践済み</li>
+</ul>
+</aside></script></section><section data-markdown><script type="text/template">
+<!-- .slide: data-background-size="1200px" data-background="./img/semver.png" -->
+
+<aside class="notes"><ul>
+<li>すべてバージョン番号に意味を追加すること</li>
+<li>アップグレードの理由がわかる</li>
+<li>安全にバージョンを上げることができる</li>
+</ul>
+</aside></script></section></section><section ><section data-markdown><script type="text/template">
+## Time-based Release Cycles
+
+<aside class="notes"><ul>
+<li>AngularJSからAngular 2は完全な書き換えだった</li>
+<li>Angular 2からAngular 4以降に関しては完全な書き換えではない</li>
+<li>APIの廃止までの段階があります</li>
+<li>AngularチームはBreaking Changesがあっても自動でアップグレードするツールを使っている</li>
+</ul>
+</aside></script></section><section data-markdown><script type="text/template">
+<!-- .slide: data-background-size="1100px" data-background="./img/release-diagram.png" -->
+
+<aside class="notes"><ul>
+<li>パッチバージョンを週に1回</li>
+<li>マイナーバージョンをメジャーバージョンのリリース後3ヶ月間毎月</li>
+<li><strong>下位互換性のある</strong>メジャーバージョンを6ヶ月毎にリリースします</li>
+</ul>
+</aside></script></section></section><section  data-markdown><script type="text/template">
+## Deprecation Policy
+
+<aside class="notes"><ul>
+<li>リリースノートで廃止予定を発表</li>
+<li>更新 (削除まで) には6か月以上の猶予があります</li>
+<li>peer dependencies なライブラリ (バージョンを決め打ちで使っているもの) TypeScriptやRxJSやZone.jsなどの更新もSemVer対象</li>
+<li>Breaking Changesでないのであればマイナーチェンジでの更新もある</li>
+</ul>
+</aside></script></section><section ><section data-markdown><script type="text/template">
+## New View Engine
+</script></section><section data-markdown><script type="text/template">
+### AOT Compiler
+
+- Angularは実行時にテンプレートの生成とディレクティブ, 要素, クエリの更新するためのViewEngineをコンパイルして作成する
+- AOT (Ahead-of-time compilation) コンパイル / JIT (Just-in-time compilation) コンパイル
+- テンプレートエラーを早期に検出し、ビルド時にコンパイルすることでパフォーマンスを向上させることが主目的
+
+<aside class="notes"><ul>
+<li>Closure Compiler</li>
+<li>Inferno.jsなどが同じくらいのパフォーマンス</li>
+<li>Tree Shakingに対応したモジュールバンドラでbundle (Webpack / Rollup / Tsickle and Clutz)</li>
+</ul>
+</aside></script></section><section data-markdown><script type="text/template">
+<!-- .slide: data-background-size="" data-background="./img/code-size.png" -->
+
+<aside class="notes"><ul>
+<li><strong>Closure Compiler無し</strong>でおよそ3分の一までテンプレートサイズを削減</li>
+</ul>
+</aside></script></section><section data-markdown><script type="text/template">
+<!-- .slide: data-background-size="1300px" data-background="./img/bentchmark.png" -->
+
+<aside class="notes"><ul>
+<li>DOMノードの作成と破棄は同じくらい</li>
+<li>更新は少し時間がかかりメモリも消費する</li>
+</ul>
+</aside></script></section><section data-markdown><script type="text/template">
+<!-- .slide: data-background-size="1300px" data-background="./img/change-detection.png" -->
+
+<aside class="notes"><ul>
+<li>131,040のバインディングのChange Detection</li>
+<li>1.5倍の時間がかかり20倍のメモリを消費</li>
+<li>OnPushコンポーネントがあるから部分的に更新するように工夫しよう</li>
+</ul>
+</aside></script></section></section><section  data-markdown><script type="text/template">
+## `*ngIf` 構文の拡張
+
+```html
+<ng-template #loading>Loading...</ng-template>
+<div *ngIf="userObservable | async; else loading; let user">
+  {{ user.name }}
+</div>
+```
+
+https://blog.lacolaco.net/post/ng4-feature-ngif/
+
+<aside class="notes"><ul>
+<li>ngIfによる条件付けと、その条件により制御されるテンプレートを分離</li>
+<li>これまでは真の場合と偽の場合にそれぞれ逆の条件のngIfが必要</li>
+<li>ngIfに渡された式の評価結果をローカル変数にアサインできる</li>
+</ul>
+</aside></script></section><section  data-markdown><script type="text/template">
+## `@angular/animation` 爆誕
+
+- コアモジュールから分離しました
+- 必要な場合だけ利用するようにしましょう
+- アニメーションが必要なライブラリをインストールすると自動でインストールされます(e.g. Material)
+</script></section><section  data-markdown><script type="text/template">
+## TypeScript 2.1
+
+- ngcが早くなりました
+- compilerの最適化とより良いエラーの恩恵が受けられるようになりました
+- TypeScript2.1は1.8と互換性がありません
+</script></section><section  data-markdown><script type="text/template">
+## StrictNullChecks
+
+```javascript
+let foo = undefined;
+foo = null; // NOT Okay
+```
+
+```javascript
+interface Member {
+  name: string,
+  age?: number
+}
+
+getMember()
+  .then(member: Member => {
+    const stringifyAge = member.age.toString()
+    // Object is possibly 'undefined'
+  })
+```
+
+<aside class="notes"><ul>
+<li>TypeScriptのStrictNullChecksに準拠しました</li>
+<li>必要に応じて、プロジェクトでStrictNullChecksを有効にすることができます</li>
+<li>undefinedを割り当てるのかNullを割り当てるのか厳密になる</li>
+</ul>
+</aside></script></section><section  data-markdown><script type="text/template">
+## Angular Universal
+
+https://github.com/FrozenPandaz/ng-universal-demo
+
+<aside class="notes"><ul>
+<li>Universalの数カ月分の作業成果がコミットされている</li>
+<li>ドキュメントが出るから寝て待て</li>
+</ul>
+</aside></script></section><section ><section data-markdown><script type="text/template">
+## Flat ES Modules (Flat ESM / FESM)
+## ES2015 Builds
+
+![Flat ESM EXAMPLE](./img/flat-esm-example.png)
+
+<aside class="notes"><ul>
+<li>試験的リリース</li>
+<li>Tree ShakingをES2015モジュールで最大限活かす</li>
+</ul>
+</aside></script></section><section data-markdown><script type="text/template">
+<!-- .slide: data-background-size="" data-background="./img/will-support-webpack.png" -->
+</script></section><section data-markdown><script type="text/template">
+<!-- .slide: data-background-size="" data-background="./img/igor-comments-on-webpack.png" -->
+
+<aside class="notes"><ul>
+<li>ファイルに7つのシンボルが含まれ、1つだけがインポートされると、7つのシンボルがすべて取り込まれます</li>
+<li>package.jsonの &quot;es2015&quot;プロパティを解決するようにWebpackを設定してください</li>
+</ul>
+</aside></script></section></section><section  data-markdown><script type="text/template">
+## まとめ
+
+- Angularは安定したバージョンアップができるように環境を整備した
+- New View Engineをはじめとする努力でより高速に<br />アプリケーションを提供できるようになった
+</script></section><section  data-markdown><script type="text/template">
+## 参考にした資料
+
+- [Angular - Generating less code](https://docs.google.com/document/d/195L4WaDSoI_kkW094LlShH6gT3B7K1GZpSBnnLkQR-g/preview)
+- [Ok... let me explain: it's going to be Angular 4.0, or just Angular](http://angularjs.blogspot.jp/2016/12/ok-let-me-explain-its-going-to-be.html)
+- [Igor Minar - Opening Keynote - Version 4 Announcement - NG-BE 2016](https://www.youtube.com/watch?v=aJIMoLgqU_o)
+- [Versioning and Releasing Angular](http://angularjs.blogspot.jp/2016/10/versioning-and-releasing-angular.html)
+- [日本語訳：Angular 2 Change Detection Explained](http://qiita.com/laco0416/items/523d96ddbfe55c4e6949)
+- [Angular AoTガイド](http://qiita.com/Quramy/items/a603ddb47d6e4b3497e1)
+- [AHEAD-OF-TIME COMPILATION](https://angular.io/docs/ts/latest/cookbook/aot-compiler.html)
+</script></section></div>
+        </div>
+
+        <script src="/lib/js/head.min.js"></script>
+        <script src="/js/reveal.js"></script>
+
+        <script>
+            function extend() {
+              var target = {};
+              for (var i = 0; i < arguments.length; i++) {
+                var source = arguments[i];
+                for (var key in source) {
+                  if (source.hasOwnProperty(key)) {
+                    target[key] = source[key];
+                  }
+                }
+              }
+              return target;
+            }
+
+            // Optional libraries used to extend on reveal.js
+            var deps = [
+              { src: '/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+              { src: '/plugin/markdown/marked.js', condition: function() { return !!document.querySelector('[data-markdown]'); } },
+              { src: '/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector('[data-markdown]'); } },
+              { src: '/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+              { src: '/plugin/zoom-js/zoom.js', async: true },
+              { src: '/plugin/notes/notes.js', async: true },
+              { src: '/plugin/math/math.js', async: true }
+            ];
+
+            // default options to init reveal.js
+            var defaultOptions = {
+              controls: true,
+              progress: true,
+              history: true,
+              center: true,
+              transition: 'default', // none/fade/slide/convex/concave/zoom
+              dependencies: deps
+            };
+
+            // options from URL query string
+            var queryOptions = Reveal.getQueryHash() || {};
+
+            var options = {};
+            options = extend(defaultOptions, options, queryOptions);
+            Reveal.initialize(options);
+        </script>
+        
+    </body>
+</html>
